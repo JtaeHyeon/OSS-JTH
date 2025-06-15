@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>생각 기록</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #e8f6fb;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+      }
+
+      .thought-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .thought-form textarea {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        resize: vertical;
+      }
+
+      .thought-form button {
+        padding: 10px;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .thought-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .thought-item {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        position: relative;
+      }
+
+      .thought-time {
+        font-size: 0.85em;
+        color: #777;
+        margin-top: 4px;
+      }
+
+      .thought-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+      }
+
+      .thought-actions button {
+        margin-left: 5px;
+        background: transparent;
+        border: none;
+        font-size: 1em;
+        cursor: pointer;
+      }
+
+      .top-btn {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+      }
+
+      .top-btn button {
+        background: #4a90e2;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .logo-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .logo-header img {
+        width: 150px;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-header">
+      <img src="/static/_mona_logo_letter.png" alt="MONA 로고" />
+    </div>
+    <div class="top-btn">
+      <button onclick="window.location.href='/home'">홈으로</button>
+    </div>
+
+    <div class="container">
+      <h1>생각 기록</h1>
+
+      <form class="thought-form" onsubmit="submitThought(event)">
+        <textarea
+          id="thought-input"
+          rows="4"
+          placeholder="당신의 생각을 자유롭게 적어보세요 (5자 이상)"
+          required
+        ></textarea>
+        <button type="submit">저장</button>
+      </form>
+
+      <ul class="thought-list" id="thought-list"></ul>
+    </div>
+
+    <script>
+      let editingItem = null;
+
+      function submitThought(event) {
+        event.preventDefault();
+
+        const textarea = document.getElementById('thought-input');
+        const text = textarea.value.trim();
+
+        if (text.length < 5) {
+          alert('생각은 최소 5자 이상 입력해야 합니다.');
+          return;
+        }
+
+        const now = new Date().toLocaleString();
+
+        if (editingItem) {
+          const createdText =
+            editingItem.querySelector('.created-time').innerText;
+          editingItem.querySelector('div').innerText = text;
+          editingItem.querySelector('.thought-time').innerHTML = `
+            <span class="created-time">${createdText}</span>
+            <span> / 마지막 수정: ${now}</span>
+          `;
+          editingItem = null;
+        } else {
+          const li = document.createElement('li');
+          li.className = 'thought-item';
+          li.innerHTML = `
+            <div>${text}</div>
+            <div class="thought-time">
+              <span class="created-time">${now}</span>
+            </div>
+            <div class="thought-actions">
+              <button onclick="editThought(this)">✏️</button>
+              <button onclick="deleteThought(this)">❌</button>
+            </div>
+          `;
+          document.getElementById('thought-list').prepend(li);
+        }
+
+        textarea.value = '';
+      }
+
+      function editThought(button) {
+        const item = button.closest('.thought-item');
+        const text = item.querySelector('div').innerText;
+        document.getElementById('thought-input').value = text;
+        editingItem = item;
+      }
+
+      function deleteThought(button) {
+        const item = button.closest('.thought-item');
+        item.remove();
+      }
+    </script>
+  </body>
+</html>

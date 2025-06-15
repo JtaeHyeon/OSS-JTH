@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>목표 관리</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #e8f6fb;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+      }
+
+      .goal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .goal-form input[type='text'],
+      .goal-form input[type='date'],
+      .goal-form input[type='number'],
+      .goal-form textarea {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+
+      .goal-form button {
+        padding: 10px;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .goal-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .goal-item {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        position: relative;
+      }
+
+      .goal-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+      }
+
+      .goal-actions button {
+        margin-left: 5px;
+        background: transparent;
+        border: none;
+        font-size: 1em;
+        cursor: pointer;
+      }
+
+      .top-btn {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+      }
+
+      .top-btn button {
+        background: #4a90e2;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .logo-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .logo-header img {
+        width: 150px;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-header">
+      <img src="/static/_mona_logo_letter.png" alt="MONA 로고" />
+    </div>
+    <div class="top-btn">
+      <button onclick="window.location.href='/home'">홈으로</button>
+    </div>
+
+    <div class="container">
+      <h1>목표 관리</h1>
+
+      <form class="goal-form" onsubmit="handleSubmit(event)">
+        <input type="text" id="goal-title" placeholder="목표 제목" required />
+        <textarea
+          id="goal-content"
+          rows="3"
+          placeholder="목표 내용 (선택)"
+        ></textarea>
+        <label>마감일: <input type="date" id="goal-deadline" /></label>
+        <label
+          >진행률:
+          <input
+            type="number"
+            id="goal-progress"
+            min="0"
+            max="100"
+            value="0"
+            required
+          />
+          %</label
+        >
+        <button type="submit">저장</button>
+      </form>
+
+      <ul class="goal-list" id="goal-list"></ul>
+    </div>
+
+    <script>
+      let editingItem = null;
+
+      function handleSubmit(event) {
+        event.preventDefault();
+
+        const title = document.getElementById('goal-title').value.trim();
+        const content = document.getElementById('goal-content').value.trim();
+        const deadline = document.getElementById('goal-deadline').value;
+        const progress = parseFloat(
+          document.getElementById('goal-progress').value
+        );
+
+        if (!title || isNaN(progress) || progress < 0 || progress > 100) {
+          alert('제목과 올바른 진행률(0~100)을 입력해주세요.');
+          return;
+        }
+
+        const itemHTML = `
+          <strong>${title}</strong><br/>
+          <span style="color: #555;">${content}</span><br/>
+          <small>마감일: ${deadline || '없음'} | 진행률: ${progress}%</small>
+          <div class="goal-actions">
+            <button onclick="editGoal(this)">✏️</button>
+            <button onclick="this.parentElement.parentElement.remove()">❌</button>
+          </div>
+        `;
+
+        if (editingItem) {
+          editingItem.innerHTML = itemHTML;
+          editingItem = null;
+        } else {
+          const li = document.createElement('li');
+          li.className = 'goal-item';
+          li.innerHTML = itemHTML;
+          document.getElementById('goal-list').appendChild(li);
+        }
+
+        document.getElementById('goal-title').value = '';
+        document.getElementById('goal-content').value = '';
+        document.getElementById('goal-deadline').value = '';
+        document.getElementById('goal-progress').value = 0;
+      }
+
+      function editGoal(button) {
+        const item = button.parentElement.parentElement;
+        const lines = item.innerText.split('\n');
+
+        const title = lines[0].trim();
+        const content = lines[1].trim();
+        const match = lines[2].match(/마감일: (.*?) \| 진행률: (\d+)%/);
+
+        if (match) {
+          const deadline = match[1] === '없음' ? '' : match[1];
+          const progress = match[2];
+          document.getElementById('goal-title').value = title;
+          document.getElementById('goal-content').value = content;
+          document.getElementById('goal-deadline').value = deadline;
+          document.getElementById('goal-progress').value = progress;
+        }
+
+        editingItem = item;
+      }
+    </script>
+  </body>
+</html>

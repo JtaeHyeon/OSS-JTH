@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>루틴 관리</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #e8f6fb;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+      }
+
+      .routines-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .routines-form input[type='text'],
+      .routines-form input[type='time'] {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+
+      .routines-form button {
+        padding: 10px;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .weekday-selector {
+        text-align: center;
+      }
+
+      .weekday-selector label {
+        margin: 0 6px;
+      }
+
+      .routines-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .routines-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .routines-item input[type='checkbox'] {
+        margin-right: 10px;
+      }
+
+      .routines-time {
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      .top-btn {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+      }
+
+      .top-btn button {
+        background: #4a90e2;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .logo-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .logo-header img {
+        width: 150px;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-header">
+      <img src="/static/_mona_logo_letter.png" alt="MONA 로고" />
+    </div>
+    <div class="top-btn">
+      <button onclick="window.location.href='/home'">홈으로</button>
+    </div>
+
+    <div class="container">
+      <h1>루틴 관리</h1>
+
+      <form class="routines-form" onsubmit="addRoutines(event)">
+        <input
+          type="text"
+          id="routines-input"
+          placeholder="새 루틴 입력"
+          required
+        />
+
+        <!-- 날짜/시간 설정 영역 -->
+        <div style="display: flex; gap: 10px; align-items: center">
+          <div style="flex: 1">
+            <label>기간 설정</label><br />
+            <input type="date" id="start-date" /> ~
+            <input type="date" id="end-date" />
+          </div>
+          <div style="flex: 1">
+            <label>시간 설정</label><br />
+            <input type="time" id="routines-time" value="07:00" required />
+          </div>
+        </div>
+
+        <!-- 기간 없이 반복 체크박스 -->
+        <label style="margin-top: 10px; display: block">
+          <input
+            type="checkbox"
+            id="no-end-date"
+            onchange="toggleDateInputs(this)"
+          />
+          기간 없이 반복
+        </label>
+
+        <!-- 요일 선택 -->
+        <div class="weekday-selector">
+          <label><input type="checkbox" class="weekday" value="월" /> 월</label>
+          <label><input type="checkbox" class="weekday" value="화" /> 화</label>
+          <label><input type="checkbox" class="weekday" value="수" /> 수</label>
+          <label><input type="checkbox" class="weekday" value="목" /> 목</label>
+          <label><input type="checkbox" class="weekday" value="금" /> 금</label>
+          <label><input type="checkbox" class="weekday" value="토" /> 토</label>
+          <label><input type="checkbox" class="weekday" value="일" /> 일</label>
+          <label style="margin-left: 10px"
+            ><input
+              type="checkbox"
+              id="select-all-weekdays"
+              onchange="toggleAllWeekdays(this)"
+            />
+            매일</label
+          >
+        </div>
+
+        <button type="submit">추가</button>
+      </form>
+
+      <ul class="routines-list" id="routines-list"></ul>
+    </div>
+
+    <script>
+      function toggleDateInputs(checkbox) {
+        const start = document.getElementById('start-date');
+        const end = document.getElementById('end-date');
+        start.disabled = end.disabled = checkbox.checked;
+      }
+
+      function addRoutines(event) {
+        event.preventDefault();
+
+        const text = document.getElementById('routines-input').value.trim();
+        const time = document.getElementById('routines-time').value;
+        const weekdays = Array.from(
+          document.querySelectorAll('.weekday-selector input:checked')
+        ).map((cb) => cb.value);
+
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        const noEndDate = document.getElementById('no-end-date').checked;
+
+        if (!text || !time || weekdays.length === 0) {
+          alert('루틴 이름, 시간, 요일을 모두 입력하세요.');
+          return;
+        }
+
+        if (!noEndDate && (!startDate || !endDate)) {
+          alert("기간을 설정하거나 '기간 없이 반복'을 선택해주세요.");
+          return;
+        }
+
+        const period = noEndDate ? '무기한 반복' : `${startDate} ~ ${endDate}`;
+
+        const li = document.createElement('li');
+        li.className = 'routines-item';
+        li.innerHTML = `
+          <li class="routines-item">
+            <div>
+              <input type="checkbox" />
+              <strong>${text}</strong> (${time})<br/>
+              <span class="routines-time">${weekdays.join(', ')}</span><br/>
+              <span style="font-size: 0.85em; color: #777;">${period}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" style="margin-left: 10px;">❌</button>
+          </li>
+    `;
+        document.getElementById('routines-list').appendChild(li);
+
+        // 초기화
+        document.getElementById('routines-input').value = '';
+        document.getElementById('routines-time').value = '07:00';
+        document
+          .querySelectorAll('.weekday-selector input')
+          .forEach((cb) => (cb.checked = false));
+        document.getElementById('start-date').value = '';
+        document.getElementById('end-date').value = '';
+        document.getElementById('no-end-date').checked = false;
+        toggleDateInputs(document.getElementById('no-end-date'));
+      }
+
+      function toggleAllWeekdays(checkbox) {
+        const weekdays = document.querySelectorAll(
+          '.weekday-selector input.weekday'
+        );
+        weekdays.forEach((cb) => (cb.checked = checkbox.checked));
+      }
+    </script>
+  </body>
+</html>

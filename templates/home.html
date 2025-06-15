@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MONA 홈</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #e8f6fb;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .logo {
+        margin-top: 50px;
+        text-align: center;
+      }
+
+      .logo img {
+        width: 300px;
+        margin-bottom: 10px;
+      }
+
+      .logo h1 {
+        margin: 0;
+        font-size: 2.5em;
+        color: #1e3a8a;
+      }
+
+      .logo p {
+        font-size: 0.95em;
+        color: #555;
+      }
+
+      .welcome-message {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #333;
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      .summary-section {
+        width: 90%;
+        max-width: 1000px;
+        margin-top: 40px;
+      }
+
+      .large-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .large-card img {
+        width: 60px;
+        margin-bottom: 15px;
+      }
+
+      .large-card h3 {
+        margin: 0;
+        color: #1e3a8a;
+      }
+
+      .large-card p {
+        color: #666;
+        margin-top: 8px;
+        font-size: 0.9em;
+      }
+
+      .summary-generate-button {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        line-height: 1.5;
+        align-self: center;
+        font-size: 0.8em;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .summary-generate-button:hover {
+        background-color: #357abd;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        width: 90%;
+        max-width: 1000px;
+        margin-top: 40px;
+      }
+
+      .card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card img {
+        width: 60px;
+        margin-bottom: 15px;
+      }
+
+      .card h3 {
+        margin: 0;
+        color: #1e3a8a;
+      }
+
+      .card p {
+        color: #666;
+        margin-top: 8px;
+        font-size: 0.9em;
+      }
+
+      .floating-setting {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background-color: white;
+        padding: 10px;
+        object-fit: contain;
+        transition: transform 0.2s ease;
+      }
+
+      .floating-setting:hover {
+        transform: scale(1.1);
+      }
+      .floating-setting {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background-color: white;
+        padding: 10px;
+        object-fit: contain;
+        transition: transform 0.2s ease;
+      }
+
+      .floating-setting:hover {
+        transform: scale(1.1);
+      }
+
+      .setting-menu {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .setting-menu button {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .setting-menu button:hover {
+        background-color: #357abd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">
+      <img src="/static/_mona_logo.png" alt="MONA 로고" />
+    </div>
+
+    <div class="welcome-message">환영합니다, {{ nickname }}님!</div>
+
+    <div class="summary-section">
+      <div class="large-card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h3 style="margin: 0">오늘의 요약</h3>
+          <button onclick="generateSummary()" class="summary-generate-button">
+            요약 생성하기
+          </button>
+        </div>
+
+        <pre
+          id="summary-output"
+          style="
+            text-align: left;
+            white-space: pre-wrap;
+            font-size: 0.95em;
+            color: #333;
+            margin-top: 12px;
+          "
+        >
+{{ summary_text }}
+    </pre
+        >
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card" onclick="location.href='/emotions'">
+        <img src="/static/emotions_icon.png" alt="감정 기록 아이콘" />
+        <h3>감정 기록</h3>
+        <p>오늘의 감정을 기록하고 그래프로 확인하세요.</p>
+      </div>
+
+      <div class="card" onclick="location.href='/routines'">
+        <img src="/static/routine_icon.png" alt="루틴 관리 아이콘" />
+        <h3>루틴 관리</h3>
+        <p>반복적인 일상을 관리하고 생산성을 높여보세요.</p>
+      </div>
+
+      <div class="card" onclick="location.href='/goal'">
+        <img src="/static/goal_icon.png" alt="목표 관리 아이콘" />
+        <h3>목표 관리</h3>
+        <p>장기적인 목표를 설정하고 달성 과정을 추적하세요.</p>
+      </div>
+
+      <div class="card" onclick="location.href='/thought'">
+        <img src="/static/thought_icon.png" alt="생각 기록 아이콘" />
+        <h3>생각 기록</h3>
+        <p>자유롭게 생각을 기록하고 정리하세요.</p>
+      </div>
+    </div>
+
+    <img
+      src="/static/settings_icon.png"
+      alt="설정"
+      class="floating-setting"
+      onclick="toggleSettingMenu()"
+    />
+    <div id="setting-menu" class="setting-menu" style="display: none">
+      <button onclick="goToTheme()">🎨 테마 설정</button>
+      <button onclick="logout()">🚪 로그아웃</button>
+    </div>
+
+    <script>
+      async function generateSummary() {
+        try {
+          const response = await fetch('/summary/generate', {
+            method: 'GET',
+            credentials: 'include',
+          });
+          const data = await response.json();
+
+          if (data.summary) {
+            document.getElementById('summary-output').textContent =
+              data.summary;
+          } else {
+            alert('요약 생성에 실패했습니다.');
+          }
+        } catch (e) {
+          console.error('요약 생성 중 오류:', e);
+          alert('요약 생성 중 오류가 발생했습니다.');
+        }
+      }
+      function toggleSettingMenu() {
+        const menu = document.getElementById('setting-menu');
+        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+      }
+
+      function goToTheme() {
+        location.href = '/theme';
+      }
+
+      async function logout() {
+        if (confirm('로그아웃 하시겠습니까?')) {
+          await fetch('/logout', { method: 'POST', credentials: 'include' });
+          window.location.href = '/login';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const color = localStorage.getItem('monaTheme');
+        if (color) {
+          document.body.style.backgroundColor = color;
+        }
+      });
+    </script>
+  </body>
+</html>

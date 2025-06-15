@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>테마 설정</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f2f6fb;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+      }
+
+      input[type='color'] {
+        width: 100px;
+        height: 50px;
+        border: none;
+        margin: 20px 0;
+        cursor: pointer;
+      }
+
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .button-group button {
+        padding: 10px 20px;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .button-group button:hover {
+        background-color: #357abd;
+      }
+
+      .reset-button {
+        background-color: #ccc !important;
+        color: black;
+      }
+
+      .reset-button:hover {
+        background-color: #999 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>🎨 테마 색상 설정</h2>
+      <input type="color" id="theme-color" />
+      <div class="button-group">
+        <button onclick="saveColor()">저장하고 홈으로</button>
+        <button class="reset-button" onclick="resetColor()">
+          원래 색으로 되돌리기
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function saveColor() {
+        const color = document.getElementById('theme-color').value;
+        localStorage.setItem('monaTheme', color);
+        alert('테마 색상이 저장되었습니다!');
+        location.href = '/home';
+      }
+
+      function resetColor() {
+        localStorage.removeItem('monaTheme');
+        alert('테마 색상이 기본값으로 되돌아갑니다.');
+        location.href = '/home';
+      }
+    </script>
+  </body>
+</html>

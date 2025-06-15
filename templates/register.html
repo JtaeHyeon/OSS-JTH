@@ -1,0 +1,272 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입 - MONA</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        height: 100vh;
+        background-color: #e8f6fb;
+        background-repeat: no-repeat;
+        background-position: left center;
+        background-size: contain;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+      }
+      .register-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .logo-header {
+        width: 350px;
+        margin-bottom: 20px;
+        cursor: pointer;
+      }
+      .logo-header img {
+        width: 100%;
+        display: block;
+      }
+      .form-container {
+        width: 350px;
+        background-color: rgba(255, 255, 255, 0.95);
+        display: flex;
+        flex-direction: column;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        justify-content: center;
+        align-items: center;
+      }
+      .form-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .form-container input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .form-container button {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .form-container button:hover {
+        background-color: #357abd;
+      }
+      .form-container p {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      .check-button {
+        width: 70px;
+        height: 40px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 10px;
+        white-space: pre-line;
+        padding: 2px;
+        margin-left: 5px;
+      }
+      .submit-button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="register-wrapper">
+        <div class="logo-header" @click="goToLogin">
+          <img src="/static/_mona_logo.png" alt="MONA 로고" />
+        </div>
+        <div class="form-container">
+          <h2>회원가입</h2>
+          <form @submit.prevent="register">
+            <div style="display: flex; width: 100%; align-items: center">
+              <input
+                type="text"
+                v-model="username"
+                placeholder="아이디"
+                required
+                style="flex: 1"
+              />
+              <button class="check-button" type="button" @click="checkUsername">
+                중복확인
+              </button>
+            </div>
+            <p
+              v-if="usernameMessage"
+              :style="{ color: usernameAvailable ? 'green' : 'red' }"
+            >
+              {{ usernameMessage }}
+            </p>
+
+            <input
+              type="text"
+              v-model="nickname"
+              placeholder="닉네임"
+              required
+            />
+            <input
+              type="password"
+              v-model="password"
+              placeholder="비밀번호"
+              required
+            />
+            <p
+              v-if="password.length > 0 && password.length < 8"
+              style="color: red"
+            >
+              비밀번호는 8자 이상이어야 합니다
+            </p>
+
+            <input
+              type="password"
+              v-model="confirmPassword"
+              placeholder="비밀번호 확인"
+              required
+            />
+            <p
+              v-if="confirmPassword && password !== confirmPassword"
+              style="color: red"
+            >
+              비밀번호가 일치하지 않습니다
+            </p>
+
+            <button class="submit-button" type="submit">가입하기</button>
+          </form>
+          <p v-if="message" :style="{ color: success ? 'green' : 'red' }">
+            {{ message }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+      createApp({
+        data() {
+          return {
+            username: '',
+            nickname: '',
+            password: '',
+            confirmPassword: '',
+            usernameAvailable: false,
+            usernameMessage: '',
+            message: '',
+            success: false,
+            lastCheckedUsername: '',
+          };
+        },
+        methods: {
+          async checkUsername() {
+            if (!this.username) return;
+            try {
+              const res = await fetch(
+                `/check-username?username=${encodeURIComponent(this.username)}`
+              );
+              const data = await res.json();
+              this.usernameAvailable = !data.exists;
+              this.usernameMessage = this.usernameAvailable
+                ? '✅ 사용 가능한 아이디입니다!'
+                : '❌ 이미 사용중인 아이디입니다.';
+              if (this.usernameAvailable) {
+                this.lastCheckedUsername = this.username;
+              }
+              alert(this.usernameMessage);
+            } catch {
+              this.usernameAvailable = false;
+              this.usernameMessage = '❌ 아이디 중복 확인에 실패했습니다';
+              alert(this.usernameMessage);
+            }
+          },
+          async register() {
+            if (this.password.length < 8) {
+              this.success = false;
+              this.message = '비밀번호는 최소 8자 이상이어야 합니다';
+              return;
+            }
+            if (this.password !== this.confirmPassword) {
+              this.success = false;
+              this.message = '비밀번호가 일치하지 않습니다';
+              return;
+            }
+            if (
+              !this.usernameAvailable ||
+              this.username !== this.lastCheckedUsername
+            ) {
+              this.success = false;
+              this.message = '아이디 중복 확인이 필요합니다';
+              alert(this.message);
+              return;
+            }
+            try {
+              const res = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  username: this.username,
+                  nickname: this.nickname,
+                  password: this.password,
+                }),
+              });
+
+              if (res.ok) {
+                const data = await res.json();
+                this.success = true;
+                this.message = `🎉 ${data.nickname}님, 회원가입이 완료되었습니다!`;
+                setTimeout(() => {
+                  if (
+                    confirm(
+                      this.message + '\n로그인 페이지로 이동하시겠습니까?'
+                    )
+                  ) {
+                    window.location.href = '/login';
+                  }
+                }, 100);
+              } else {
+                let errorMessage = '가입 실패';
+                try {
+                  const errorData = await res.json();
+                  errorMessage = errorData.detail || errorMessage;
+                } catch (e) {
+                  console.warn('응답 JSON 파싱 실패:', e);
+                }
+                this.success = false;
+                this.message = errorMessage;
+                alert(this.message);
+              }
+            } catch (err) {
+              this.success = false;
+              this.message = '서버 연결 실패';
+              alert(this.message);
+            }
+          },
+          goToLogin() {
+            window.location.href = '/login';
+          },
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>

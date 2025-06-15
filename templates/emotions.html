@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>감정 기록하기</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #e8f6fb;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .top-btn {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+      }
+
+      .top-btn button {
+        background: #4a90e2;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .logo-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .logo-header img {
+        width: 150px;
+        height: auto;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-section,
+      .list-section {
+        margin-bottom: 28px;
+      }
+
+      label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+        color: #555;
+      }
+
+      select,
+      textarea,
+      input[type='range'] {
+        width: 100%;
+        max-width: 550px;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        margin-top: 4px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      }
+
+      .level-display {
+        text-align: center;
+        color: #007bff;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+
+      button.submit {
+        margin-top: 20px;
+        width: 100%;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 16px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      button.submit:hover {
+        background-color: #218838;
+      }
+
+      .emotion-entry {
+        background-color: #e9ecef;
+        border-left: 6px solid #007bff;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+
+      .emotion-entry .date {
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .no-records {
+        text-align: center;
+        color: #888;
+        font-style: italic;
+        padding: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-btn">
+      <button onclick="window.location.href='/home'">홈으로</button>
+    </div>
+
+    <div class="logo-header">
+      <img src="/static/_mona_logo_letter.png" alt="MONA 로고" />
+    </div>
+
+    <div class="container">
+      <div id="app">
+        {% raw %}
+        <div class="form-section">
+          <label>감정 유형</label>
+          <select v-model="newEmotion.emotion_type">
+            <option v-for="type in emotionTypes" :key="type" :value="type">
+              {{ type }}
+            </option>
+          </select>
+
+          <label>강도 (1~10)</label>
+          <input
+            type="range"
+            v-model.number="newEmotion.level"
+            min="1"
+            max="10"
+          />
+          <div class="level-display">{{ newEmotion.level }} / 10</div>
+
+          <label>메모 (선택)</label>
+          <textarea
+            v-model="newEmotion.note"
+            placeholder="짧은 감정 메모를 입력하세요."
+          ></textarea>
+
+          <button class="submit" @click="submitEmotion">기록 추가</button>
+        </div>
+
+        <div class="list-section">
+          <h2>나의 감정 기록</h2>
+          <div v-if="emotions.length > 0">
+            <div
+              v-for="entry in emotions"
+              :key="entry.id"
+              class="emotion-entry"
+            >
+              <div class="date">{{ formatDate(entry.date) }}</div>
+              <div>
+                <strong>감정:</strong> {{ entry.emotion_type }} ({{ entry.level
+                }}/10)
+              </div>
+              <div v-if="entry.note">
+                <strong>메모:</strong> {{ entry.note }}
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-records">감정 기록이 없습니다.</div>
+        </div>
+        {% endraw %}
+      </div>
+    </div>
+
+    <script>
+      const nicknameFromServer = '{{ nickname }}';
+    </script>
+
+    {% raw %}
+    <script>
+      const { createApp } = Vue;
+      createApp({
+        data() {
+          return {
+            nickname: nicknameFromServer,
+            newEmotion: {
+              emotion_type: 'Happy',
+              level: 5,
+              note: '',
+            },
+            emotions: [],
+            emotionTypes: [
+              'Happy',
+              'Sad',
+              'Angry',
+              'Neutral',
+              'Excited',
+              'Calm',
+            ],
+          };
+        },
+        methods: {
+          goToHome() {
+            window.location.href = '/home';
+          },
+          async submitEmotion() {
+            try {
+              const response = await fetch('/emotions/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.newEmotion),
+              });
+              if (!response.ok) throw new Error('기록 실패');
+              this.newEmotion = { emotion_type: 'Happy', level: 5, note: '' };
+              this.fetchEmotions();
+              alert('감정이 기록되었습니다.');
+            } catch (e) {
+              alert('감정 기록 실패');
+            }
+          },
+          async fetchEmotions() {
+            try {
+              const response = await fetch('/emotions/');
+              if (!response.ok) throw new Error('불러오기 실패');
+              const data = await response.json();
+              this.emotions = data.sort(
+                (a, b) => new Date(b.date) - new Date(a.date)
+              );
+            } catch (e) {
+              alert('기록 불러오기 실패');
+            }
+          },
+          formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('ko-KR');
+          },
+        },
+        mounted() {
+          this.fetchEmotions();
+        },
+      }).mount('#app');
+    </script>
+    {% endraw %}
+  </body>
+</html>
