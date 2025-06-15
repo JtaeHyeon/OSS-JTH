@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\정태현\Documents\OSS-JTH\venv"
+VIRTUAL_ENV="C:\OSS-JTH\OSS-JTH\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

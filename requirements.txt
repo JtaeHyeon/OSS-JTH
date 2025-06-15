@@ -1,0 +1,8 @@
+fastapi==0.111.0
+uvicorn==0.30.1
+python-multipart==0.0.9
+SQLAlchemy==2.0.30
+pydantic==2.7.3
+pydantic-settings==2.3.4 # FastAPI 0.100+에서 Pydantic v2 사용시 필요
+email_validator==2.1.1 # Pydantic EmailStr 사용시 필요
+python-dotenv==1.0.1
